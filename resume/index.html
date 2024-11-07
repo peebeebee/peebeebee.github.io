@@ -10,11 +10,6 @@
         --font: 400 16px/1.5 system-ui;
       }
 
-      @page {
-        size: A4 portrait;
-        margin: 0mm;
-      }
-
       * {
         box-sizing: border-box;
       }
@@ -36,15 +31,15 @@
         text-rendering: optimizeLegibility;
       }
 
-      a {
-        color: inherit;
-        text-decoration: none;
+      hr {
+        height: 1px;
+        border: none;
+        border-top: 1px dotted canvasText;
+        opacity: 0.6;
       }
 
-      h1,
-      h2,
-      h3 {
-        page-break-after: avoid;
+      a {
+        text-decoration: none;
       }
 
       h1 {
@@ -69,13 +64,20 @@
         margin-block-end: 0.75rem;
       }
 
-      .columns {
+      .layout {
         display: grid;
-        grid-template-columns: 130px 1fr;
+      }
+
+      .layout__title {
+        grid-column: 1 / 2;
+      }
+
+      .layout__block {
+        grid-column: 2 / 3;
       }
 
       .tags {
-        font-size: 14px;
+        font-size: 87.5%;
         line-height: 1.75;
       }
 
@@ -85,18 +87,17 @@
         margin-inline-start: -0.9rem;
       }
 
-      header {
-        margin-block: 20mm 0;
-      }
-
-      header,
-      section,
-      .project {
-        margin-block-end: 2rem;
-      }
-
       footer {
-        font-size: 14px;
+        font-size: 87.5%;
+        line-height: 1.75;
+      }
+
+      .space + .space {
+        margin-block: 2rem 0;
+      }
+
+      header {
+        margin-block-start: 6rem;
       }
 
       @media screen {
@@ -106,6 +107,14 @@
           max-width: 680px;
         }
 
+        .print-only {
+          display: none;
+        }
+
+        .layout {
+          grid-template-columns: 130px 1fr;
+        }
+
         .tags {
           opacity: 0.6;
         }
@@ -113,253 +122,258 @@
         .tags::before {
           content: none;
         }
-
-        footer {
-          display: none;
-        }
       }
 
       @media screen and (max-width: 600px) {
-        .columns {
-          grid-template-columns: 1fr;
-        }
-
         h2 {
           font-size: 20px;
           line-height: 1.2;
           margin-block: 2rem 1rem;
         }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .layout__title,
+        .layout__block {
+          grid-column: 1 / 2;
+        }
+      }
+
+      @page {
+        size: A4 portrait;
+        /* margin: 20mm 20mm 20mm 20mm; */
       }
 
       @media print {
-        .sheet {
-          width: 210mm;
-          height: 280mm;
-          page-break-after: always;
-          padding: 10mm 20mm;
+        :root {
+          --font: 400 13px/1.5 system-ui;
         }
 
-        .columns {
-          gap: 10mm;
-          grid-template-columns: 25mm 1fr;
+        body {
+          margin: 20mm 20mm 20mm 20mm;
+        }
+
+        a {
+          color: inherit;
+        }
+
+        h1,
+        h2,
+        h3 {
+          page-break-after: avoid;
+        }
+
+        .screen-only {
+          display: none;
+        }
+
+        .page-break {
+          opacity: 0;
+          height: 20mm;
+          page-break-before: always;
+        }
+
+        .project {
+          page-break-inside: avoid;
+        }
+
+        .layout {
+          grid-template-columns: 30mm 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <div class="sheet">
-      <header class="columns">
-        <div class="column"></div>
-        <div class="column">
-          <h1>Peter Briers</h1>
-          <address>
-            Oude Kuringerbaan 1<br />
-            3500 Hasselt<br />
-            <a href="mailto:peter@bijtendblanco.be"> peter@bijtendblanco.be</a
-            ><br />
-            <a href="tel:+32499165894">+32 499 16 58 94</a>
-          </address>
-        </div>
-      </header>
+    <header class="layout space">
+      <h1 class="layout__block">Peter Briers</h1>
+      <address class="layout__block">
+        Oude Kuringerbaan 1<br />
+        3500 Hasselt<br />
+        <a href="mailto:peter@bijtendblanco.be"> peter@bijtendblanco.be</a
+        ><br />
+        <a href="tel:+32499165894">+32 499 16 58 94</a>
+      </address>
+    </header>
 
-      <section class="columns">
-        <div class="column">
-          <h2>Profile</h2>
-        </div>
-        <div class="column">
+    <section class="layout space">
+      <h2 class="layout__title">Profile</h2>
+      <p class="layout__block">
+        Specialised in web development and design.<br />
+        Multidisciplinary knowledge makes for a profile that can bridge the gap
+        between the technical and creative world.<br />
+        Seeking roles that merge creativity with technology.<br />
+      </p>
+    </section>
+
+    <section class="layout space">
+      <h2 class="layout__title">Professional skills</h2>
+      <ul class="layout__block">
+        <li>
+          Design responsively, mobile first, with progressive enhancements.
+        </li>
+        <li>Focused on accessibility and performance.</li>
+        <li>
+          Able to write performant and maintainable CSS across multiple
+          methodologies, and pre- and postprocessors.
+        </li>
+        <li>
+          Proficient in PHP and JavaScript (Typescript), working knowledge of
+          Python and Java.
+        </li>
+        <li>
+          Work with modern and legacy JS frameworks, including Backbone, React,
+          Ionic, AngularJS, Angular, Vue,…
+        </li>
+        <li>Practice Test Driven Development.</li>
+        <li>Extensive knowledge about browser render engines.</li>
+        <li>Work in different Agile Methodologies, eg. Scrum, Kanban,…</li>
+        <li>
+          Design in multiple tools (Adobe Photoshop, Illustrator, Sketch, Figma)
+        </li>
+      </ul>
+    </section>
+
+    <section class="layout space">
+      <h2 class="layout__title">Languages</h2>
+      <p class="layout__block">
+        Dutch (native), Engels (proficient), French (moderate)
+      </p>
+    </section>
+
+    <section class="layout space">
+      <h2 class="layout__title">Education</h2>
+      <ul class="layout__block">
+        <li>
+          <h3>Multimedia & Communication Technology (BA)</h3>
+          <p>Provinciale Industriele Hogeschool, Kortrijk, 2007</p>
+        </li>
+        <li>
+          <h3>Communication & Multimedia Design (MA)</h3>
+          <p>Katholieke Hogeschool Limburg, Genk, 2010</p>
+        </li>
+      </ul>
+    </section>
+
+    <hr class="page-break print-only space" />
+
+    <section class="layout space">
+      <h2 class="layout__title">Experience</h2>
+      <main class="layout__block">
+        <div class="project space">
+          <h3>Elision (2020-2024)</h3>
           <p>
-            Specialised in web development and design.<br />
-            Multidisciplinary knowledge makes for a profile that can bridge the
-            gap between the technical and creative world.<br />
-            Seeking roles that merge creativity with technology.<br />
+            Set up and maintained multiple multisite e-commerce platforms for
+            various clients through the Spartacus framework. Supported the
+            frontend team with best-practice component-based development.<br />
+            Collaborated on an admin portal, written in Next.js and Nest.js.
+          </p>
+
+          <p class="tags">
+            Typescript, Angular 17, SAP Spartacus, TDD, BEM, Web components,
+            Next.js, Nest.js, Azure DevOps, Jenkins
           </p>
         </div>
-      </section>
 
-      <section class="columns">
-        <div class="column">
-          <h2>Professional skills</h2>
+        <div class="project space">
+          <h3>Trendminer (2019)</h3>
+          <p>
+            Greenfield project for their new main frontend application.<br />
+            Set up a new stable best-practices base so future development could
+            move quickly and without regression. 100% unit-tested and
+            feature-tested with multiple micro-frontends.
+          </p>
+          <p class="tags">Typescript, Angular 8, NgRx, Nx, REST</p>
         </div>
-        <div class="column">
-          <ul>
-            <li>
-              Design responsively, mobile first, with progressive enhancements.
-            </li>
-            <li>Focused on accessibility and performance.</li>
-            <li>
-              Able to write performant and maintainable CSS across multiple
-              methodologies, and pre- and postprocessors.
-            </li>
-            <li>
-              Proficient in PHP and JavaScript (Typescript), working knowledge
-              of Python and Java.
-            </li>
-            <li>
-              Work with modern and legacy JS frameworks, including Backbone,
-              React, Ionic, AngularJS, Angular, Vue,…
-            </li>
-            <li>Practice Test Driven Development.</li>
-            <li>Extensive knowledge about browser render engines.</li>
-            <li>Work in different Agile Methodologies, eg. Scrum, Kanban,…</li>
-            <li>
-              Design in multiple tools (Adobe Photoshop, Illustrator, Sketch,
-              Figma)
-            </li>
-          </ul>
+        <div class="project space">
+          <h3>2Imagine (2018-2019)</h3>
+          <p>
+            Improved their custom HTML5 InDesign editor to ensure
+            transformations on page-objects were more performant and
+            bug-free.<br />
+            Learned to work with transformation-matrices.
+          </p>
+          <p class="tags">Typescript, Angular 6</p>
         </div>
-      </section>
+        <div class="project space">
+          <h3>KBC (2018)</h3>
+          <p>
+            Managed quality and performance as the frontend technical lead for
+            their new car insurance solution. Prospects and existing clients can
+            simulate and purchase their car insurance completely online.<br />
+            This hybrid solution was implemented in the mobile-, and web-apps.
+          </p>
+          <p class="tags">JavaScript, AngularJS, Java, RequireJS, SASS, Jade</p>
+        </div>
+        <div class="project space">
+          <h3>Wolters Kluwer (2016 – 2017)</h3>
+          <p>
+            Facilitated the development team transition from on premise to cloud
+            development, introduced Scrum methodologies and set up development
+            workflow with automated CI/CD pipelines. Transitioned code from
+            JavaScript to Typescript.<br />
+            Used custom Typescript decorators to move to Angular 2
+            component-like code. Integrated unit testing. <br />
+            Made the services & sales teams part of the UX-development chain
+            <br />
+            Published Angular components to the private company repository.
+          </p>
+          <p class="tags">Typescript, AngularJS, SystemJS, Gulp, Angular 2</p>
+        </div>
+        <hr class="page-break print-only space" />
+        <div class="project space">
+          <h3>KBC (2014 – 2016)</h3>
+          <p>
+            Optimised the performance and stability of the frontend application
+            and managed the component library on the KBC Touch Core team.
+          </p>
 
-      <section class="columns">
-        <div class="column">
-          <h2>Languages</h2>
+          <p class="tags">
+            JavaScript, AngularJS, Java, RequireJS, Grunt, Gulp, SASS, Jade
+          </p>
         </div>
+        <div class="project space">
+          <h3>Medialaan (2014)</h3>
+          <p>
+            Reworked their existing Electronic Program Guide, with the focus on
+            a being very lightweight and performant.
+          </p>
+          <p class="tags">Gulp, Backbone, Browserify, Responsive design.</p>
+        </div>
+        <div class="project space">
+          <h3>Bagaar (2014)</h3>
+          <p>
+            Helped the Bagaar team develop a social & learning network for
+            starting investors.
+          </p>
+          <p class="tags">HTML, CSS (OOCSS), PHP (Laravel)</p>
+        </div>
+        <div class="project space">
+          <h3>One-Agency (2012 – 2014)</h3>
+          <p>
+            Oversee & actively participate on frontend development.<br />
+            Converting delivered graphical designs into functional multilingual
+            responsive websites.
+          </p>
+          <p class="tags">Drupal, HTML, CSS, Responsive design</p>
+        </div>
+      </main>
+    </section>
 
-        <div class="column">
-          <p>Dutch (native), Engels (proficient), French (moderate)</p>
-        </div>
-      </section>
-
-      <section class="columns">
-        <div class="column">
-          <h2>Education</h2>
-        </div>
-        <div class="column">
-          <ul>
-            <li>
-              <h3>Multimedia & Communication Technology (BA)</h3>
-              <p>Provinciale Industriele Hogeschool, Kortrijk, 2007</p>
-            </li>
-            <li>
-              <h3>Communication & Multimedia Design (MA)</h3>
-              <p>Katholieke Hogeschool Limburg, Genk, 2010</p>
-            </li>
-          </ul>
-        </div>
-      </section>
-    </div>
-    <div class="sheet">
-      <div class="columns">
-        <div class="column">
-          <h2>Experience</h2>
-        </div>
-        <div class="column">
-          <div class="project">
-            <h3>Elision (2020-2024)</h3>
-            <p>
-              Set up and maintained multiple multisite e-commerce platforms for
-              various clients through the Spartacus framework. Supported the
-              frontend team with best-practice component-based development.<br />
-              Collaborated on an admin portal, written in Next.js and Nest.js.
-            </p>
-
-            <p class="tags">
-              Typescript, Angular 17, SAP Spartacus, TDD, BEM, Web components,
-              Next.js, Nest.js, Azure DevOps, Jenkins
-            </p>
-          </div>
-
-          <div class="project">
-            <h3>Trendminer (2019)</h3>
-            <p>
-              Greenfield project for their new main frontend application.<br />
-              Set up a new stable best-practices base so future development
-              could move quickly and without regression. 100% unit-tested and
-              feature-tested with multiple micro-frontends.
-            </p>
-            <p class="tags">Typescript, Angular 8, NgRx, Nx, REST</p>
-          </div>
-          <div class="project">
-            <h3>2Imagine (2018-2019)</h3>
-            <p>
-              Improved their custom HTML5 InDesign editor to ensure
-              transformations on page-objects were more performant and
-              bug-free.<br />
-              Learned to work with transformation-matrices.
-            </p>
-            <p class="tags">Typescript, Angular 6</p>
-          </div>
-          <div class="project">
-            <h3>KBC (2018)</h3>
-            <p>
-              Managed quality and performance as the frontend technical lead for
-              their new car insurance solution. Prospects and existing clients
-              can simulate and purchase their car insurance completely
-              online.<br />
-              This hybrid solution was implemented in the mobile-, and web-apps.
-            </p>
-            <p class="tags">
-              JavaScript, AngularJS, Java, RequireJS, SASS, Jade
-            </p>
-          </div>
-          <div class="project">
-            <h3>Wolters Kluwer (2016 – 2017)</h3>
-            <p>
-              Facilitated the development team transition from on premise to
-              cloud development, introduced Scrum methodologies and set up
-              development workflow with automated CI/CD pipelines. Transitioned
-              code from JavaScript to Typescript.<br />
-              Used custom Typescript decorators to move to Angular 2
-              component-like code. Integrated unit testing. <br />
-              Made the services & sales teams part of the UX-development chain
-              <br />
-              Published Angular components to the private company repository.
-            </p>
-            <p class="tags">Typescript, AngularJS, SystemJS, Gulp, Angular 2</p>
-          </div>
-        </div>
+    <footer class="layout space">
+      <div class="layout__block">
+        <hr />
+        <em class="print-only">
+          Made in HTML & CSS, and viewable on
+          <a href="https://peterbriers.be/resume"> peterbriers.be/resume</a>
+        </em>
+        <em class="screen-only">
+          <a href="#" onclick="event.preventDefault(); window.print();">
+            Print this page
+          </a>
+        </em>
       </div>
-    </div>
-    <div class="sheet">
-      <div class="columns">
-        <div class="column"></div>
-        <div class="column">
-          <div class="project">
-            <h3>KBC (2014 – 2016)</h3>
-            <p>
-              Optimised the performance and stability of the frontend
-              application and managed the component library on the KBC Touch
-              Core team.
-            </p>
-
-            <p class="tags">
-              JavaScript, AngularJS, Java, RequireJS, Grunt, Gulp, SASS, Jade
-            </p>
-          </div>
-          <div class="project">
-            <h3>Medialaan (2014)</h3>
-            <p>
-              Reworked their existing Electronic Program Guide, with the focus
-              on a being very lightweight and performant.
-            </p>
-            <p class="tags">Gulp, Backbone, Browserify, Responsive design.</p>
-          </div>
-          <div class="project">
-            <h3>Bagaar (2014)</h3>
-            <p>
-              Helped the Bagaar team develop a social & learning network for
-              starting investors.
-            </p>
-            <p class="tags">HTML, CSS (OOCSS), PHP (Laravel)</p>
-          </div>
-          <div class="project">
-            <h3>One-Agency (2012 – 2014)</h3>
-            <p>
-              Oversee & actively participate on frontend development.<br />
-              Converting delivered graphical designs into functional
-              multilingual responsive websites.
-            </p>
-            <p class="tags">Drupal, HTML, CSS, Responsive design</p>
-          </div>
-
-          <footer>
-            <hr />
-            <em
-              >Made in HTML & CSS, and printed from
-              <a href="https://peterbriers.be/resume"> peterbriers.be/resume</a>
-            </em>
-          </footer>
-        </div>
-      </div>
-    </div>
+    </footer>
   </body>
 </html>
