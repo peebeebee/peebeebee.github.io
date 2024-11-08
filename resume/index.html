@@ -7,7 +7,7 @@
     <style>
       :root {
         color-scheme: light dark;
-        --font: 400 16px/1.5 system-ui;
+        --font: 400 0.95rem/1.5 system-ui;
       }
 
       * {
@@ -34,8 +34,8 @@
       hr {
         height: 1px;
         border: none;
-        border-top: 1px dotted canvasText;
-        opacity: 0.6;
+        border-top: 1px solid canvasText;
+        opacity: 0.1;
       }
 
       a {
@@ -43,8 +43,22 @@
       }
 
       h1 {
-        font-size: 24px;
-        font-weight: 500;
+        font-size: 2rem;
+        line-height: 2rem;
+        font-weight: 400;
+      }
+
+      h1 small {
+        font-weight: 700;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        opacity: 0.7;
+        text-transform: uppercase;
+        display: block;
+      }
+
+      h1 hr {
+        margin-block: 2rem;
       }
 
       h2 {
@@ -97,7 +111,7 @@
       }
 
       header {
-        margin-block-start: 6rem;
+        margin-block-start: 2rem;
       }
 
       @media screen {
@@ -165,6 +179,10 @@
           page-break-after: avoid;
         }
 
+        h1 hr {
+          margin-block: 1rem;
+        }
+
         .screen-only {
           display: none;
         }
@@ -187,7 +205,11 @@
   </head>
   <body>
     <header class="layout space">
-      <h1 class="layout__block">Peter Briers</h1>
+      <h1 class="layout__block">
+        Peter Briers<br />
+        <small>Web developer</small>
+        <hr />
+      </h1>
       <address class="layout__block">
         Oude Kuringerbaan 1<br />
         3500 Hasselt<br />
@@ -345,7 +367,7 @@
           <h3>Bagaar (2014)</h3>
           <p>
             Helped the Bagaar team develop a social & learning network for
-            starting investors.
+            starting&nbsp;investors.
           </p>
           <p class="tags">HTML, CSS (OOCSS), PHP (Laravel)</p>
         </div>
