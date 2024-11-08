@@ -80,6 +80,7 @@
 
       .layout {
         display: grid;
+        gap: 0 2rem;
       }
 
       .layout__title {
@@ -162,7 +163,7 @@
 
       @media print {
         :root {
-          --font: 400 13px/1.5 system-ui;
+          --font: 400 12px/1.4 system-ui;
         }
 
         body {
@@ -183,13 +184,16 @@
           margin-block: 1rem;
         }
 
+        hr {
+          border: 0;
+        }
+
         .screen-only {
           display: none;
         }
 
         .page-break {
           opacity: 0;
-          height: 20mm;
           page-break-before: always;
         }
 
