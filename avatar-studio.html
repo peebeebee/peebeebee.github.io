@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Avatar Studio</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧑‍🎨</text></svg>" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --page: light-dark(#f5f5f5, #141414);
+        --muted: light-dark(#5c5c5c, #a3a3a3);
+        --panel: color-mix(in srgb, CanvasText 3%, var(--page));
+        --line: color-mix(in srgb, CanvasText 10%, transparent);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 0.875rem/1.5 system-ui, sans-serif;
+        background: var(--page);
+      }
+
+      main {
+        display: grid;
+        gap: 2rem;
+        max-width: 72rem;
+        margin-inline: auto;
+        padding: 2rem 1rem;
+      }
+
+      @media (min-width: 56rem) {
+        main {
+          grid-template-columns: minmax(0, 1fr) 23rem;
+          align-items: start;
+        }
+
+        .stage {
+          position: sticky;
+          top: 2rem;
+        }
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+
+      .stage > p {
+        margin: 0.25rem 0 1.5rem;
+        color: var(--muted);
+      }
+
+      .big {
+        width: 100%;
+        max-width: 30rem;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px var(--line);
+      }
+
+      .big.square {
+        border-radius: 0.5rem;
+      }
+
+      .big svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .strips {
+        display: grid;
+        gap: 0.5rem;
+        max-width: 30rem;
+        margin-top: 1.5rem;
+      }
+
+      .strip {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      .strip.light {
+        background: #f5f5f5;
+      }
+
+      .strip.dark {
+        background: #141414;
+      }
+
+      .strip img {
+        display: block;
+        border-radius: 50%;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+      }
+
+      button {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 0.375rem;
+        background: light-dark(#fff, #222);
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .actions label {
+        display: flex;
+        gap: 0.375rem;
+        margin-left: 0.5rem;
+        color: var(--muted);
+      }
+
+      fieldset {
+        margin: 0 0 1rem;
+        padding: 0.75rem 1rem 1rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: var(--panel);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+
+      legend {
+        float: left;
+        width: 100%;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+      }
+
+      .row {
+        clear: both;
+        display: grid;
+        grid-template-columns: 8rem 1fr 2.5rem;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 1.875rem;
+      }
+
+      .row output {
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+
+      .row input[type="range"],
+      .row select {
+        width: 100%;
+        margin: 0;
+        font: inherit;
+      }
+
+      .row input[type="color"] {
+        width: 100%;
+        height: 1.5rem;
+        padding: 0;
+        border: 0;
+        background: none;
+      }
+
+      .row input[type="checkbox"] {
+        justify-self: start;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="stage">
+        <h1>Avatar Studio</h1>
+        <p>Tune the cartoon, check it at small sizes, then download it.</p>
+        <div class="big" id="big"></div>
+        <div class="strips">
+          <div class="strip light"><img alt="" width="96" height="96" /><img alt="" width="64" height="64" /><img alt="" width="40" height="40" /><img alt="" width="24" height="24" /></div>
+          <div class="strip dark"><img alt="" width="96" height="96" /><img alt="" width="64" height="64" /><img alt="" width="40" height="40" /><img alt="" width="24" height="24" /></div>
+        </div>
+        <div class="actions">
+          <button type="button" id="svg">Download SVG</button>
+          <button type="button" id="png">Download PNG</button>
+          <button type="button" id="copy">Copy SVG</button>
+          <button type="button" id="reset">Reset</button>
+          <label><input type="checkbox" id="square" /> Square</label>
+        </div>
+      </section>
+      <form id="controls"></form>
+    </main>
+
+    <script>
+      // ----- Generator: builds the SVG from a plain settings object -----
+
+      // Cartoon caricature generator: one bold silhouette line, flat colour with warm hard-edged shadows.
+      // The hair is a mass that sits on the skull (the skull runs up under it), so the hairline is just the hair's lower edge on the forehead.
+      const DEFAULTS = {
+        zoom: 0.95,
+        tilt: -6,
+        jaw: 1.03,
+        earSize: 1,
+        receding: 0.97,
+        forelock: 0,
+        quiff: 1.03,
+        sweep: 1.12,
+        hair: "#e8e6e2",
+        eyeSize: 1.04,
+        lids: 0.4,
+        glance: 1.5,
+        wryBrow: 0.8,
+        browWeight: 1.2,
+        noseSize: 0.99,
+        noseLength: -3,
+        noseStyle: "round",
+        smirk: 0.6,
+        iris: "#5b8cba",
+        skin: "#f2c7ad",
+        blush: 0.5,
+        beard: "goatee",
+        beardSize: 0.83,
+        beardColor: "#7d6d5e",
+        outfit: "cardigan",
+        outfitColor: "#2b3a5f",
+        sunglasses: false,
+        outline: 1.6,
+        shading: 1.45,
+        ink: "#25282e",
+        outerLine: 0,
+        bg: "#9fadba",
+        transparent: true,
+      };
+
+      const INK = "#2e2220";
+      const n = (v) => +(+v).toFixed(1);
+      const pt = ([x, y]) => `${n(x)} ${n(y)}`;
+      const rgb = (h) => {
+        if (h.length === 4) h = "#" + [...h.slice(1)].map((c) => c + c).join("");
+        return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+      };
+      const mix = (a, b, t) => {
+        const [x, y] = [rgb(a), rgb(b)];
+        return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * Math.max(0, Math.min(1, t))).toString(16).padStart(2, "0")).join("");
+      };
+      const at = (x, y, s) => `translate(${n(x)} ${n(y)}) scale(${n(s * 1000) / 1000}) translate(${n(-x)} ${n(-y)})`;
+      const M = ([x, y, s]) => [512 - x, y, s];
+
+      // Mirror a path (absolute commands) across x = 256
+      const mirror = (d) => {
+        let cmd = "", i = 0;
+        return d.replace(/[A-Z]|-?\d*\.?\d+/gi, (t) => {
+          if (/[A-Z]/i.test(t)) return (cmd = t), (i = 0), t;
+          const isX = cmd === "H" || (cmd !== "V" && i++ % 2 === 0);
+          return isX ? n(512 - t) : t;
+        });
+      };
+
+      // Smooth path through points [x, y, sharp]; sharp points become corners
+      const smooth = (P, closed = true) => {
+        const N = P.length;
+        const get = (i) => (closed ? P[(i + N) % N] : P[Math.max(0, Math.min(N - 1, i))]);
+        const towards = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        let d = `M${pt(P[0])}`;
+        for (let i = 0; i < (closed ? N : N - 1); i++) {
+          const [p0, p1, p2, p3] = [get(i - 1), get(i), get(i + 1), get(i + 2)];
+          const c1 = p1[2] ? towards(p1, p2, 0.3) : [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+          const c2 = p2[2] ? towards(p2, p1, 0.3) : [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+          d += `C${pt(c1)} ${pt(c2)} ${pt(p2)}`;
+        }
+        return closed ? d + "Z" : d;
+      };
+
+      // A tapered, calligraphic stroke along a curve, as a filled shape (w0/w1 = end widths, w = belly)
+      const taper = (P, w, w0 = 0, w1 = 0) => {
+        const S = [];
+        const get = (i) => P[Math.max(0, Math.min(P.length - 1, i))];
+        for (let i = 0; i < P.length - 1; i++) {
+          const [p0, p1, p2, p3] = [get(i - 1), get(i), get(i + 1), get(i + 2)];
+          for (let s = 0; s < 5; s++) {
+            const t = s / 5, t2 = t * t, t3 = t2 * t;
+            S.push([0, 1].map((k) => 0.5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3)));
+          }
+        }
+        S.push(P[P.length - 1]);
+        const L = [], R = [];
+        S.forEach((p, i) => {
+          const a = S[Math.max(0, i - 1)], b = S[Math.min(S.length - 1, i + 1)];
+          const dx = b[0] - a[0], dy = b[1] - a[1];
+          const len = Math.hypot(dx, dy) || 1;
+          const t = i / (S.length - 1);
+          const hw = (w0 + (w1 - w0) * t + w * Math.pow(Math.sin(Math.PI * t), 0.75)) / 2;
+          L.push([p[0] - (dy / len) * hw, p[1] + (dx / len) * hw]);
+          R.push([p[0] + (dy / len) * hw, p[1] - (dx / len) * hw]);
+        });
+        return "M" + L.concat(R.reverse()).map(pt).join("L") + "Z";
+      };
+
+      function avatarSVG(p) {
+        const INK = p.ink || "#2e2220";
+        const sh = p.shading, ol = p.outline;
+        const op = (a) => n(Math.min(1, a * sh) * 100) / 100;
+        const shade = (a) => `fill="#000" fill-opacity="${op(a)}"`;
+        const light = (a) => `fill="#fff" fill-opacity="${op(a)}"`;
+        const thin = (w) => (ol > 0 ? `stroke="${INK}" stroke-width="${n(w * ol)}" stroke-linejoin="round" stroke-linecap="round"` : "");
+        const inkFill = (d, o = 1) => `<path d="${d}" fill="${INK}"${o < 1 ? ` fill-opacity="${o}"` : ""} />`;
+        const lw = (w) => w * Math.max(0.4, ol);
+        // Warm shadows on skin, cool ones on the silver hair
+        const skinShadow = mix(p.skin, "#b0544c", 0.3 * sh);
+        const hairShadow = mix(p.hair, "#66707f", 0.4 * sh);
+        const beardShadow = mix(p.beardColor, "#2a1d17", 0.32 * sh);
+        let uid = 0;
+        // Shapes drawn more than once are defined once and reused with <use>; ids are prefixed so the SVG can be inlined in a page
+        const defs = [];
+        const def = (name, d) => (defs.push(`<path id="av-${name}" d="${d}" />`), `<use href="#av-${name}"`);
+        // Two hard-edged tones: the shape in its shadow colour, then a copy shifted towards the light on top
+        const cel = (shape, base, dark, dx, dy, extra = "", w = 3) => {
+          const id = `av-c${uid++}`;
+          return `<clipPath id="${id}">${shape} /></clipPath>
+            ${shape} fill="${dark}" />
+            <g clip-path="url(#${id})">${shape} transform="translate(${dx} ${dy})" fill="${base}" />${extra}</g>
+            ${shape} fill="none" ${thin(w)} />`;
+        };
+
+        // ---------- Skull and face: one shape that runs up under the hair ----------
+        const J = ([x, y, s]) => [y > 280 ? 256 + (x - 256) * p.jaw : x, y, s];
+        const faceL = [[256, 60], [198, 66], [158, 94], [140, 140], [137, 200], [139, 258], [148, 312], [172, 362], [208, 398], [236, 411]];
+        const face = def("face", smooth([...faceL, [256, 413], ...faceL.slice(1).reverse().map(M)].map(J)));
+
+        // ---------- Hair: tousled silver crop; the receding M is the lower edge of the mass ----------
+        const r = p.receding, f = p.forelock;
+        const up = (x, y) => {
+          const h = Math.max(0, 150 - y);
+          return [x + h * 0.4 * (p.sweep - 1), 150 - h * p.quiff];
+        };
+        const H = (x, y, s) => [...up(x, y), s];
+        const by = 150 - 62 * r; // top of the temple bays
+        const fy = 146 - 6 * r + 9 * (f - 1); // forelock tips
+        const crest = [
+          [135, 246, 1], [134, 222], [132, 200], [129, 178], [127, 158], H(124, 134), H(126, 104), H(140, 76), H(162, 52), H(194, 32), H(234, 18), H(270, 10),
+          H(300, 4, 1), H(302, 18), H(334, 16), H(360, 18, 1), H(360, 34), H(384, 44), H(400, 52, 1), H(390, 70), H(398, 92), H(406, 108, 1),
+          H(392, 120), H(390, 138), [383, 166], [381, 182], [380, 200], [378, 222], [377, 246, 1],
+        ];
+        const hairline = [
+          [365, 246, 1], [365, 222], [363, 200], [361, 182], [359, 168], [354, 150 - 12 * r], [344, by + 14], [330, by + 2], [314, by + 4], [300, by + 18],
+          [289, (by + fy) / 2 + 4], [284, fy - 12], [280, fy + 4, 1], [270, fy - 4], [260, fy + 8, 1], [250, fy - 4], [240, (by + fy) / 2 + 8],
+          [228, by + 14], [212, by + 2], [196, by + 2], [178, by + 12], [164, 150 - 12 * r], [153, 168], [151, 182], [149, 200], [147, 222], [147, 246, 1],
+        ];
+        const hair = def("hair", smooth([...crest, ...hairline]));
+        const lock = (pts, w, w0, w1) => taper(pts.map(([x, y]) => up(x, y)), w, w0, w1);
+        const grooves = [
+          [[[230, 110], [248, 60], [300, 20]], 5, 0, 5],
+          [[[262, 124], [300, 70], [358, 34]], 5, 0, 5],
+          [[[312, 104], [348, 82], [390, 70]], 5, 0, 5],
+          [[[342, 134], [372, 118], [392, 120]], 4, 0, 4],
+          [[[164, 128], [168, 86], [200, 52]], 5, 0, 0],
+        ];
+        const shines = [
+          [[176, 92], [202, 56], [244, 34]],
+          [[256, 98], [278, 62], [314, 38]],
+          [[308, 88], [334, 72], [364, 60]],
+        ];
+
+        // ---------- Ears ----------
+        const earL = "M144 228C120 206 99 220 98 256C97 290 116 313 146 311Z";
+        const earInL = "M137 248C124 241 112 250 113 266C114 281 124 290 139 290Z";
+        const earFold = taper([[134, 253], [120, 249], [115, 266], [123, 283], [135, 287]], 2.4, 0.8, 0.8);
+
+        // ---------- Body ----------
+        const neck = def("neck", "M214 368C214 402 211 432 204 458L200 500L312 500L308 458C301 432 298 402 298 368Z");
+        const bodyD = "M20 600L22 548C26 508 62 488 112 478C150 470 182 460 204 448C222 482 290 482 308 448C330 460 362 470 400 478C450 488 486 508 490 548L492 600Z";
+        const collarD = "M204 448C222 482 290 482 308 448C303 445 298 445 294 448C280 468 232 468 218 448C214 445 209 445 204 448Z";
+
+        // ---------- Beard parts ----------
+        const tache = def("tache", smooth([[256, 346], [270, 344], [287, 347], [298, 353], [303, 360, 1], [289, 357], [272, 357], [256, 359], [240, 357], [223, 357], [209, 360, 1], [214, 353], [225, 347], [242, 344]]));
+        const goatee = def("goatee", smooth([[249, 387], [263, 387], [270, 393], [284, 398], [292, 407], [287, 417], [271, 424], [256, 426], [241, 424], [225, 417], [220, 407], [228, 398], [242, 393]]));
+        const soul = "M250 380C254 382 258 382 262 380L259 389C257 391 255 391 253 389Z";
+        const linkD = "M214 368C212 380 218 394 230 404L236 400C228 392 223 382 222 370Z";
+        const beardOn = p.beard === "goatee" || p.beard === "circle";
+        const gT = at(256, 400, p.beardSize);
+
+        // ---------- Silhouette: one bold outer line, drawn behind everything ----------
+        const head = `translate(0 14) rotate(${p.tilt} 256 440)`;
+        const earsSil = `<g transform="${at(140, 268, p.earSize)}"><path d="${earL}" /></g><g transform="${at(372, 268, p.earSize)}"><path d="${mirror(earL)}" /></g>`;
+        const outer = ol * (p.outerLine ?? 1);
+        const silhouette =
+          outer > 0
+            ? `<g class="av-outline" fill="${INK}" stroke="${INK}" stroke-width="${n(13 * outer)}" stroke-linejoin="round"><path d="${bodyD}" />${neck} />
+            <g class="av-head"><g transform="${head}"><g class="av-ears">${earsSil}</g>${face} /><g class="av-hair">${hair} /></g>${beardOn ? `<g class="av-mouth">${goatee} transform="${gT}" /></g>` : ""}</g></g></g>`
+            : "";
+
+        // ---------- Eyes: clear almonds, big grey-blue irises, a light lid ----------
+        const l = p.lids, g = p.glance;
+        const eyeWhite = "M177 250C181 230 229 223 241 245C235 264 189 269 177 250Z";
+        const lidFill = `M168 200L252 200L252 ${n(245 + l)}C229 ${n(224 + 14 * l)} 183 ${n(231 + 14 * l)} 168 ${n(251 - 2 * l)}Z`;
+        const eye = (right) => {
+          const Mi = (d) => (right ? mirror(d) : d);
+          const cx = right ? 304 : 208, id = `av-c${uid++}`;
+          const ix = cx + (right ? -2 : 2) + g;
+          return `<g transform="${at(cx, 247, p.eyeSize)}"><g class="av-blink av-blink-${right ? "r" : "l"}" style="transform-origin: ${cx}px 252px">
+            <clipPath id="${id}"><path d="${Mi(eyeWhite)}" /></clipPath>
+            <path d="${Mi(eyeWhite)}" fill="#fbf8f4" />
+            <g clip-path="url(#${id})">
+              <g class="av-iris"><circle cx="${ix}" cy="248" r="14.5" fill="${p.iris}" />
+              <path d="M${ix - 14.5} 248A14.5 14.5 0 0 0 ${ix + 14.5} 248Z" fill="#fff" fill-opacity="0.16" />
+              <circle cx="${ix}" cy="248" r="14.5" fill="none" stroke="${INK}" stroke-opacity="0.45" stroke-width="2" />
+              <circle cx="${ix}" cy="248" r="6.4" fill="#191c21" />
+              <circle cx="${ix + 5.5}" cy="242.5" r="4" fill="#fff" />
+              <circle cx="${ix - 5}" cy="254" r="1.8" fill="#fff" fill-opacity="0.85" /></g>
+              <path d="${Mi(eyeWhite)}" transform="translate(0 7)" fill="none" stroke="#000" stroke-opacity="${op(0.12)}" stroke-width="6" />
+              <path d="${Mi(lidFill)}" fill="${p.skin}" />
+              <path d="${Mi(lidFill)}" fill="${skinShadow}" fill-opacity="0.5" />
+            </g>
+            ${inkFill(Mi(taper([[176, 251 - 2 * l], [197, 233 + 9 * l], [224, 228 + 9 * l], [243, 245 + l]], lw(4.4), lw(1.2), lw(2.4))))}
+            ${inkFill(Mi(taper([[188, 257], [205, 260], [224, 256]], lw(2))), 0.4)}
+          </g><path class="av-lid av-lid-${right ? "r" : "l"}" d="${Mi(taper([[176, 249], [194, 253], [222, 254], [243, 248]], lw(4.2), lw(2), lw(2)))}" fill="${INK}" opacity="0" /></g>`;
+        };
+
+        // ---------- Brows: low, fairly straight, thick at the inner end; one raised ----------
+        const bw = p.browWeight, browColor = mix(p.beardColor, INK, 0.3);
+        const brow = (lift, right) => {
+          const d = taper([[174, 223 - 7 * lift], [194, 211 - 10 * lift], [220, 209 - 5 * lift], [244, 215 - lift]], 5 * bw, 2 * bw, 10 * bw);
+          const end = `<circle cx="${right ? 268 : 244}" cy="${n(215 - lift)}" r="${n(5 * bw)}" />`;
+          return `<g class="av-brow-${right ? "r" : "l"}" fill="${browColor}"><path d="${right ? mirror(d) : d}" />${end}</g>`;
+        };
+
+        // ---------- Nose: long and straight, a soft rounded tip ----------
+        const nl = p.noseLength;
+        const Y = (y) => n(y + nl);
+        const nose = `<g transform="${at(258, 316 + nl, p.noseSize)}">
+            <path d="${taper([[263, 238], [270, 280 + nl / 2], [279, 310 + nl]], 15, 2, 6)}" fill="${skinShadow}" />
+            <path d="M240 ${Y(306)}C230 ${Y(314)} 232 ${Y(328)} 244 ${Y(331)}C250 ${Y(338)} 266 ${Y(338)} 272 ${Y(331)}C284 ${Y(328)} 286 ${Y(314)} 276 ${Y(306)}C274 ${Y(294)} 266 ${Y(288)} 258 ${Y(288)}C250 ${Y(288)} 242 ${Y(294)} 240 ${Y(306)}Z" fill="${mix(p.skin, "#e6866f", 0.1)}" />
+            <path d="M274 ${Y(312)}C283 ${Y(318)} 281 ${Y(329)} 272 ${Y(333)}C268 ${Y(336)} 263 ${Y(338)} 259 ${Y(338)}C266 ${Y(332)} 272 ${Y(323)} 274 ${Y(312)}Z" fill="${skinShadow}" />
+            ${inkFill(taper([[249, 240], [247, 272 + nl / 2], [241, 300 + nl]], lw(2.6), 0, lw(1)), 0.5)}
+            ${p.noseStyle === "line" ? `${inkFill(taper([[277, 304 + nl], [286, 316 + nl], [281, 328 + nl], [268, 333 + nl]], lw(3.4), lw(0.8), lw(1.6)))}
+            ${inkFill(taper([[238, 312 + nl], [234, 322 + nl], [242, 330 + nl]], lw(2.6), lw(0.8), lw(1.2)), 0.7)}
+            ${inkFill(taper([[247, 330 + nl], [252, 334 + nl], [257, 333 + nl]], lw(3), lw(1.4), lw(0.6)))}
+            ${inkFill(taper([[262, 333 + nl], [266, 334 + nl], [270, 331 + nl]], lw(2.6), lw(0.6), lw(1.2)))}` : `${inkFill(taper([[240, 306 + nl], [230, 315 + nl], [235, 329 + nl], [246, 332 + nl], [258, 338 + nl], [270, 333 + nl], [281, 329 + nl], [285, 315 + nl], [276, 306 + nl]], lw(3.6), lw(1.4), lw(1)))}
+            <ellipse cx="251" cy="${Y(332)}" rx="4" ry="2.4" transform="rotate(20 251 ${Y(332)})" fill="${INK}" />
+            <ellipse cx="265" cy="${Y(332)}" rx="4" ry="2.4" transform="rotate(-20 265 ${Y(332)})" fill="${INK}" />`}
+            <ellipse cx="252" cy="${Y(312)}" rx="6" ry="4" transform="rotate(-25 252 ${Y(312)})" ${light(0.55)} />
+          </g>`;
+
+        // ---------- Mouth: a friendly closed smile, higher on one side ----------
+        const sm = p.smirk;
+        const mouth = `${inkFill(taper([[228, 371], [242, 379], [260, 381], [277, 377 - 2 * sm], [290, 368 - 6 * sm]], lw(3.4), lw(2), lw(1.6)))}
+            <path d="${taper([[246, 389], [258, 391], [270, 388]], 3.5)}" ${shade(0.14)} />`;
+
+        // ---------- Facial hair ----------
+        let beard = "";
+        const part = (shape, strokes = []) => cel(shape, p.beardColor, beardShadow, -4, -6, strokes.map((q) => `<path d="${taper(q, 2.4, 0, 0)}" fill="${beardShadow}" />`).join(""), 2.4);
+        if (p.beard === "stubble") {
+          beard = `<g fill="${p.beardColor}" fill-opacity="0.32">
+            <path d="M150 330C166 384 208 424 256 428C304 424 346 384 362 330C342 372 312 392 296 394C292 370 274 360 256 360C238 360 220 370 216 394C200 392 170 372 150 330Z" />
+            <path d="M216 360C226 342 286 342 296 360C282 352 230 352 216 360Z" />
+          </g>`;
+        } else if (beardOn) {
+          beard = `${p.beard === "circle" ? part(`<path d="${linkD}"`) + part(`<path d="${mirror(linkD)}"`) : ""}
+            ${part(tache, [[[230, 350], [226, 358]], [[244, 348], [241, 357]], [[268, 348], [271, 357]], [[282, 350], [286, 358]]])}
+            <path d="${taper([[234, 350], [246, 346], [254, 348]], 3)}" ${light(0.25)} />
+            <g transform="${gT}">${part(goatee)}
+            </g>`;
+        }
+
+        // ---------- Outfit ----------
+        const oc = p.outfitColor, ocDark = mix(oc, "#000", 0.28), ocLight = mix(oc, "#fff", 0.12);
+        const panel = "M20 600L22 548C26 508 62 488 112 478C150 470 182 460 204 448C206 478 214 530 222 600Z";
+        const band = "M204 448C206 478 214 530 222 600L240 600C232 530 223 478 217 452Z";
+        const tee = "#8d9198";
+        const collarShadow = `<path d="M214 452C230 482 282 482 298 452C292 494 220 494 214 452Z" ${shade(0.16)} />`;
+        let body;
+        if (p.outfit === "jacket") {
+          const lapel = "M204 448C196 470 196 492 200 512C218 502 238 494 256 492L254 470C236 468 218 460 204 448Z";
+          body = `<path d="${bodyD}" fill="#2f3136" />
+            <path d="M218 450C236 480 276 480 294 450V494H218Z" fill="#191a1d" />
+            <path d="${lapel}" fill="#40434a" ${thin(3)} /><path d="${mirror(lapel)}" fill="#33363c" ${thin(3)} />
+            <path d="M256 492V600" stroke="#5c5f66" stroke-width="2.5" />`;
+        } else if (p.outfit === "t-shirt") {
+          body = `<path d="${bodyD}" fill="${oc}" /><path d="${mirror(panel)}" ${shade(0.15)} />${collarShadow}<path d="${collarD}" fill="${ocDark}" ${thin(3)} />`;
+        } else {
+          body = `<path d="${bodyD}" fill="${tee}" />
+            ${collarShadow}
+            <path d="${collarD}" fill="${mix(tee, "#000", 0.12)}" ${thin(3)} />
+            <path d="${panel}" fill="${oc}" ${thin(3)} />
+            <path d="${mirror(panel)}" fill="${oc}" ${thin(3)} />
+            <path d="${mirror(panel)}" ${shade(0.18)} />
+            <path d="${band}" fill="${ocLight}" ${thin(2.5)} />
+            <path d="${mirror(band)}" fill="${mix(ocLight, "#000", 0.14)}" ${thin(2.5)} />
+            <circle cx="230" cy="526" r="4" fill="${ocDark}" /><circle cx="234" cy="574" r="4" fill="${ocDark}" />`;
+        }
+
+        const glasses = () => {
+          const [gx, gy] = up(256, 92);
+          const lens = "M180 88C180 79 186 74 195 74H241C250 74 254 80 252 89L249 102C247 110 241 113 233 113H198C189 113 184 108 183 100Z";
+          return `<g transform="translate(${n(gx - 256)} ${n(gy - 94)}) rotate(-3 256 94)">
+            ${inkFill(taper([[182, 90], [160, 92], [142, 104]], 6, 6, 4))}${inkFill(mirror(taper([[182, 90], [160, 92], [142, 104]], 6, 6, 4)))}
+            <path d="${lens}" fill="#24262b" stroke="${INK}" stroke-width="5" stroke-linejoin="round" />
+            <path d="${mirror(lens)}" fill="#24262b" stroke="${INK}" stroke-width="5" stroke-linejoin="round" />
+            <path d="M252 88C254 84 258 84 260 88" fill="none" stroke="${INK}" stroke-width="7" />
+            <path d="${taper([[194, 84], [214, 80], [230, 80]], 4)}" fill="#fff" fill-opacity="0.45" />
+            <path d="${mirror(taper([[230, 80], [214, 80], [194, 84]], 4))}" fill="#fff" fill-opacity="0.45" />
+          </g>`;
+        };
+
+        const blush = p.blush > 0 ? `<ellipse cx="196" cy="296" rx="24" ry="12" fill="#ec7f72" fill-opacity="${n(Math.min(1, 0.2 * p.blush) * 100) / 100}" /><ellipse cx="318" cy="296" rx="24" ry="12" fill="#ec7f72" fill-opacity="${n(Math.min(1, 0.2 * p.blush) * 100) / 100}" />` : "";
+
+        const ears = `<g transform="${at(140, 268, p.earSize)}">
+              <path d="${earL}" fill="${p.skin}" />
+              <path d="${earInL}" fill="${mix(p.skin, skinShadow, 0.6)}" />
+              <path d="${earFold}" fill="${INK}" fill-opacity="0.3" />
+              <path d="${earL}" fill="none" ${thin(3)} />
+            </g>
+            <g transform="${at(372, 268, p.earSize)}">
+              <path d="${mirror(earL)}" fill="${mix(p.skin, skinShadow, 0.25)}" />
+              <path d="${mirror(earInL)}" fill="${mix(p.skin, skinShadow, 0.7)}" />
+              <path d="${mirror(earFold)}" fill="${INK}" fill-opacity="0.3" />
+              <path d="${mirror(earL)}" fill="none" ${thin(3)} />
+            </g>`;
+
+        // Parts carry classes (av-head, av-hair, av-ears, av-brows, av-eyes, av-blink, av-iris, av-lid, av-nose, av-mouth) so a page can animate them;
+        // av-lid is a closed eye line, hidden unless a page shows it during a blink
+        const faceCel = cel(face, p.skin, skinShadow, -14, -9, `
+              <g class="av-hair">${hair} transform="translate(3 10)" fill="${skinShadow}" /></g>
+              ${blush}
+              <path d="${taper([[190, 168], [212, 158], [238, 156]], 9)}" ${light(0.22)} />`);
+        const hairCel = cel(hair, p.hair, hairShadow, -3, -8, `
+              ${grooves.map(([q, w, w0, w1]) => `<path d="${lock(q, w, w0, w1)}" fill="${hairShadow}" />`).join("\n        ")}
+              ${shines.map((q) => `<path d="${lock(q, 6, 0, 0)}" ${light(0.8)} />`).join("\n        ")}`);
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Cartoon portrait of Peter Briers">
+        <defs>${defs.join("")}</defs>
+        ${p.transparent ? "" : `<rect width="512" height="512" fill="${p.bg}" />`}
+        <g transform="${at(256, 256, p.zoom)} translate(0 8)">
+          ${silhouette}
+          ${neck} fill="${p.skin}" />
+          <clipPath id="av-neck-clip">${neck} /></clipPath><path d="M200 380C226 438 286 438 312 380L312 470L200 470Z" fill="${skinShadow}" clip-path="url(#av-neck-clip)" />
+          ${neck} fill="none" ${thin(3)} />
+          ${body}
+          <g class="av-head"><g transform="${head}">
+            <g class="av-ears">${ears}</g>
+            ${faceCel}
+            <g class="av-brows">${brow(0, false)}${brow(p.wryBrow, true)}</g>
+            <g class="av-eyes">${eye(false)}${eye(true)}</g>
+            <g class="av-nose">${nose}</g>
+            <g class="av-mouth">${mouth}${beard}</g>
+            <g class="av-hair">${hairCel}${p.sunglasses ? glasses() : ""}</g>
+          </g></g>
+        </g>
+      </svg>
+      `;
+      }
+
+
+      // ----- Page: controls, previews, downloads -----
+
+      const CONTROLS = [
+        ["Head", [["zoom", "Zoom", 0.8, 1.15, 0.01], ["tilt", "Tilt", -12, 12, 0.5], ["jaw", "Jaw width", 0.85, 1.2, 0.01], ["earSize", "Ears", 0.7, 1.5, 0.01]]],
+        ["Hair", [["receding", "Receding", 0, 1.3, 0.01], ["forelock", "Forelock", 0, 2, 0.01], ["quiff", "Quiff height", 0.75, 1.6, 0.01], ["sweep", "Sweep right", 0.4, 1.8, 0.01], ["hair", "Colour"]]],
+        ["Face", [["eyeSize", "Eye size", 0.9, 1.4, 0.01], ["lids", "Heavy lids", 0, 1, 0.01], ["glance", "Glance", -5, 5, 0.5], ["wryBrow", "Raised brow", -1, 1.5, 0.05], ["browWeight", "Brow weight", 0.6, 2, 0.01], ["noseSize", "Nose size", 0.8, 1.4, 0.01], ["noseLength", "Nose length", -10, 20, 0.5], ["noseStyle", "Nose style", ["round", "line"]], ["smirk", "Smile tilt", -1, 1.5, 0.05], ["blush", "Blush", 0, 2, 0.05], ["iris", "Eye colour"], ["skin", "Skin"]]],
+        ["Beard", [["beard", "Style", ["goatee", "circle", "stubble", "none"]], ["beardSize", "Chin patch size", 0.7, 1.4, 0.01], ["beardColor", "Colour"]]],
+        ["Style", [["outline", "Ink lines", 0, 2, 0.05], ["outerLine", "Outer line", 0, 2, 0.05], ["ink", "Ink colour"], ["shading", "Shading", 0, 2, 0.05], ["outfit", "Outfit", ["cardigan", "jacket", "t-shirt"]], ["outfitColor", "Outfit colour"], ["sunglasses", "Sunglasses on head"], ["bg", "Background"], ["transparent", "No background"]]],
+      ];
+
+      const state = { ...DEFAULTS };
+      for (const [k, v] of new URLSearchParams(location.hash.slice(1))) {
+        if (!(k in DEFAULTS)) continue;
+        state[k] = typeof DEFAULTS[k] === "number" ? +v : typeof DEFAULTS[k] === "boolean" ? v === "1" : v;
+      }
+
+      const form = document.getElementById("controls");
+      const inputs = {};
+      for (const [title, rows] of CONTROLS) {
+        const set = form.appendChild(document.createElement("fieldset"));
+        set.innerHTML = `<legend>${title}</legend>`;
+        for (const [key, label, a, b, step] of rows) {
+          const row = set.appendChild(document.createElement("label"));
+          row.className = "row";
+          const kind = Array.isArray(a) ? "select" : typeof DEFAULTS[key] === "boolean" ? "checkbox" : typeof DEFAULTS[key] === "number" ? "range" : "color";
+          row.innerHTML =
+            kind === "select"
+              ? `<span>${label}</span><select>${a.map((o) => `<option>${o}</option>`).join("")}</select><output></output>`
+              : `<span>${label}</span><input type="${kind}" ${kind === "range" ? `min="${a}" max="${b}" step="${step}"` : ""} /><output></output>`;
+          const input = row.querySelector("input, select");
+          inputs[key] = input;
+          input.addEventListener("input", () => {
+            state[key] = kind === "checkbox" ? input.checked : kind === "range" ? +input.value : input.value;
+            update();
+          });
+        }
+      }
+
+      function sync() {
+        for (const [key, input] of Object.entries(inputs)) {
+          if (input.type === "checkbox") input.checked = state[key];
+          else input.value = state[key];
+          if (input.type === "range") input.parentElement.querySelector("output").textContent = state[key];
+        }
+      }
+
+      const big = document.getElementById("big");
+      const smalls = document.querySelectorAll(".strip img");
+      const dataUrl = (svg) => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+
+      function update() {
+        const svg = avatarSVG(state);
+        big.innerHTML = svg;
+        smalls.forEach((img) => (img.src = dataUrl(svg)));
+        for (const [key, input] of Object.entries(inputs)) {
+          if (input.type === "range") input.parentElement.querySelector("output").textContent = state[key];
+        }
+        const changed = new URLSearchParams();
+        for (const k in DEFAULTS) {
+          if (state[k] !== DEFAULTS[k]) changed.set(k, typeof state[k] === "boolean" ? +state[k] : state[k]);
+        }
+        history.replaceState(null, "", changed.size ? "#" + changed : location.pathname);
+      }
+
+      const save = (blob, name) => {
+        const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+
+      document.getElementById("svg").onclick = () => save(new Blob([avatarSVG(state)], { type: "image/svg+xml" }), "avatar.svg");
+      document.getElementById("png").onclick = async () => {
+        const img = new Image();
+        img.src = dataUrl(avatarSVG(state));
+        await img.decode();
+        const canvas = Object.assign(document.createElement("canvas"), { width: 1024, height: 1024 });
+        canvas.getContext("2d").drawImage(img, 0, 0, 1024, 1024);
+        canvas.toBlob((blob) => save(blob, "avatar.png"));
+      };
+      document.getElementById("copy").onclick = (e) => {
+        navigator.clipboard.writeText(avatarSVG(state)).then(() => {
+          e.target.textContent = "Copied";
+          setTimeout(() => (e.target.textContent = "Copy SVG"), 1200);
+        });
+      };
+      document.getElementById("reset").onclick = () => {
+        Object.assign(state, DEFAULTS);
+        sync();
+        update();
+      };
+      document.getElementById("square").onchange = (e) => big.classList.toggle("square", e.target.checked);
+
+      sync();
+      update();
+    </script>
+  </body>
+</html>
