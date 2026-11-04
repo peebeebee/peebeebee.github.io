@@ -46,7 +46,10 @@
         /* Light falling on the tiles: a soft sheen across the middle, a little shade low down */
         --sheen: light-dark(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.03));
         --shade: light-dark(rgb(0 0 0 / 0.025), rgb(0 0 0 / 0.12));
-        /* How much of its screenshot's colour a tile takes on when hovered */
+        /* Light lines are see-through, so they pick up a tile's tint on hover */
+        --highlight: color-mix(in srgb, Canvas 80%, transparent);
+        /* The strips beside the grid, between its top and bottom lines */
+        --band: light-dark(#f9f9f9, #171717);        /* How much of its screenshot's colour a tile takes on when hovered */
         --tint-amount: 6%;
         --hairline: 1px;
         --space: 1rem;
@@ -153,6 +156,8 @@
       .grid {
         position: relative;
         display: grid;
+        /* Paints --band across the full window width, without making it scroll */
+        border-image: conic-gradient(var(--band) 0 0) fill 0 / / 0 100vw;
       }
 
       /* Top and bottom lines, on top so the tiles don't cover them */
@@ -188,6 +193,12 @@
 
       .project {
         --tint: var(--tile);
+        /* The divider takes on three times the tile's tint, so the colour shows in it */
+        --divider: color-mix(
+          in srgb,
+          var(--tint) calc(var(--tint-mix, 0%) * 3),
+          var(--tile)
+        );
         position: relative;
         /* Keeps the tile's line (below) behind its content */
         isolation: isolate;
@@ -214,14 +225,37 @@
         }
       }
 
-      /* The line under each tile, run on to the edges of the window */
+      /*
+        On touch screens a tile takes on its colour while it's in view, fading
+        in and out near the edges of the screen as you scroll
+      */
+      @keyframes tint-in-view {
+        30%,
+        70% {
+          --tint-mix: var(--tint-amount);
+        }
+      }
+
+      @media (hover: none) {
+        .project {
+          animation: tint-in-view linear both;
+          /* After the shorthand, which would reset it */
+          animation-timeline: view();
+          animation-range: cover 10% cover 90%;
+        }
+      }
+
+      /*
+        The line under each tile, run on to the edges of the window. Drawn with an
+        inset shadow: a box only half a pixel tall can round away to nothing.
+      */
       .project::before {
         content: "";
         position: absolute;
         inset: auto calc((100% - 100cqi) / 2) 0;
         z-index: -1;
-        height: var(--hairline);
-        background: var(--line);
+        height: 1px;
+        box-shadow: inset 0 calc(var(--hairline) * -1) var(--line);
         pointer-events: none;
       }
 
@@ -256,22 +290,25 @@
         }
       }
 
-      /* A faint catch of light along the bottom edge of each tile */
+      /*
+        Along the bottom edge of each tile, as on the original cards: a 1px catch
+        of light, with a 1px shadow under it, both fading out towards the sides
+      */
       .project::after {
         content: "";
         position: absolute;
         inset: auto 0 0;
-        height: calc(var(--hairline) + 1px);
+        height: 2px;
         background:
-          linear-gradient(90deg, transparent 30%, Canvas, transparent 65%) top /
+          linear-gradient(90deg, transparent 30%, var(--highlight), transparent 65%) top /
             100% 1px no-repeat,
           linear-gradient(
               90deg,
               transparent 25%,
-              color-mix(in srgb, CanvasText 20%, transparent),
+              color-mix(in srgb, CanvasText 15%, transparent),
               transparent 75%
             )
-            bottom / 100% var(--hairline) no-repeat;
+            bottom / 100% 1px no-repeat;
         pointer-events: none;
         z-index: 1;
       }
@@ -316,8 +353,8 @@
         align-items: baseline;
         gap: 0.5rem;
         padding-top: 1rem;
-        border-top: 1px solid color-mix(in srgb, CanvasText 8%, transparent);
-        box-shadow: inset 0 1px Canvas;
+        border-top: 1px solid color-mix(in srgb, var(--divider), CanvasText 8%);
+        box-shadow: inset 0 1px color-mix(in srgb, var(--divider), Canvas 80%);
         font-size: 0.875rem;
         color: var(--muted);
       }
