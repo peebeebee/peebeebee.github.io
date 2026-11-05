@@ -150,21 +150,17 @@
       }
 
       /*
-        The avatar stands on the grid's top line, as if he's peeking over the
-        tiles: at the right of the text on wide screens, in a row of his own
-        below it on narrow ones
+        On wide screens the avatar stands on the grid's top line at the right
+        of the text, as if he's peeking over the tiles. On narrow ones he sits
+        in a small round frame above the heading, so the text keeps its width.
+        Either way he ducks out of sight (behind the line, or down into the
+        frame) as you scroll.
       */
       .intro {
         display: grid;
       }
 
       .intro .intro_avatar {
-        justify-self: end;
-        width: 7.5rem;
-        max-width: none;
-        /* Down through the header's bottom padding, onto the line */
-        margin: 0.5rem 0 calc(var(--pad) * -1.25);
-        /* He ducks behind the line as you scroll */
         overflow: clip;
       }
 
@@ -172,6 +168,17 @@
         display: block;
         width: 100%;
         height: auto;
+      }
+
+      @media (width < 48rem) {
+        .intro .intro_avatar {
+          grid-row: 1;
+          width: 5.5rem;
+          margin-bottom: 1.25rem;
+          border: var(--hairline) solid var(--line);
+          border-radius: 50%;
+          background: var(--tile);
+        }
       }
 
       @media (min-width: 48rem) {
@@ -185,7 +192,9 @@
           grid-row: 1 / span 3;
           align-self: end;
           width: clamp(10rem, 16vw, 14rem);
-          margin-top: 0;
+          max-width: none;
+          /* Down through the header's bottom padding, onto the line */
+          margin-bottom: calc(var(--pad) * -1.25);
         }
       }
 
@@ -727,11 +736,11 @@
     </main>
     <script type="module">
       /*
-        The avatar in the header: he rises from behind the line, looks towards
-        the pointer and turns his head a little, raises an eyebrow when it comes
-        close, ducks behind the line as you scroll down (his hair bouncing with
-        the scroll speed), blinks now and then and glances around when left
-        alone. The motion runs on springs that stop once they have settled.
+        The avatar in the header: he rises into view, looks towards the pointer
+        and turns his head a little, raises an eyebrow when it comes close,
+        ducks out of sight as you scroll down (his hair bouncing with the scroll
+        speed), blinks now and then and glances around when left alone. The
+        motion runs on springs that stop once they have settled.
       */
       const box = document.querySelector(".intro_avatar");
       const svg = box?.querySelector("svg");
